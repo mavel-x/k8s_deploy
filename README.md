@@ -56,7 +56,7 @@ docker image build -t web_django backend_main_django/
 
 Запустите сервис (он будет направлять запросы к нужным подам):
 ```shell
-kubectl apply -f k8s/web-django-load-balancer.yml
+kubectl apply -f k8s/web-django-service.yml
 ```
 
 Создайте ConfigMap: скопируйте файл `web-django-config.yml.template`, 
@@ -65,17 +65,24 @@ kubectl apply -f k8s/web-django-load-balancer.yml
 - `SECRET_KEY`: любое (см. выше)
 - `DATABASE_URL`: в секции `host` должен быть внешний IP-адрес вашего компьютера. 
 Получить его можно командой `ip a`.
-- `ALLOWED_HOSTS`: здесь должен быть внешний IP сервиса, 
-который вы запустили в предыдущем шаге. Получите его командой `kubectl show svc`.
+- `ALLOWED_HOSTS`: имя хоста вашего сайта (или несколько через запятую).
 
 Загрузите конфиг:
 ```shell
 kubectl apply -f k8s/web-django-config.yml
 ```
 
-Запустите deployment:
-```shell
-kubectl apply -f k8s/web-django-deployment.yml
+Добавьте DNS record. В случае с версией для разработки на minikube, получите IP-адрес куба с помощью команды `minikube ip` и добавьте строчку с этим IP в файл `/etc/hosts`. Например:
+```
+192.168.49.2 star-burger.test
 ```
 
-Готово! Сайт доступен в браузере по внешнему IP-адресу сервиса.
+
+Запустите deployment и ingress:
+```shell
+kubectl apply -f k8s/web-django-deployment.yml
+kubectl apply -f k8s/star-burger-ingress.yml
+```
+
+
+Готово! Сайт доступен в браузере по адресам, указанным в `ALLOWED_HOSTS`.
