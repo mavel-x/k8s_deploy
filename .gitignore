@@ -1,3 +1,6 @@
+k8s/web-django-config.yml
+**/.env
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]

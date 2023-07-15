@@ -1,0 +1,11 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: web-django-config
+  labels:
+    app: web-django
+data:
+  SECRET_KEY: ...
+  DATABASE_URL: ...
+  ALLOWED_HOSTS: ...
+  DEBUG: "False"
