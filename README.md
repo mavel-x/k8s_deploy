@@ -84,5 +84,15 @@ kubectl apply -f k8s/web-django-deployment.yml
 kubectl apply -f k8s/star-burger-ingress.yml
 ```
 
+Запустите CronJob для очистки устаревших сессий Django:
+```shell
+kubectl apply -f k8s/web-django-clearsessions.yml
+```
+
+Перезапустить deployment на новых настройках, например при изменениях в ConfigMap:
+```shell
+kubectl rollout restart deployment
+```
+
 
 Готово! Сайт доступен в браузере по адресам, указанным в `ALLOWED_HOSTS`.
