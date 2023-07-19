@@ -1,0 +1,23 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: django-createsuperuser
+spec:
+  backoffLimit: 2
+  activeDeadlineSeconds: 60
+  ttlSecondsAfterFinished: 600
+  template:
+    metadata:
+      labels:
+        app: web-django
+        component: maintenance
+    spec:
+      restartPolicy: Never
+      containers:
+      - name: createsuperuser
+        image: web_django:latest
+        imagePullPolicy: Never
+        command: ["python", "manage.py", "createsuperuser", "--noinput"]
+        envFrom:
+          - configMapRef:
+              name: web-django-config

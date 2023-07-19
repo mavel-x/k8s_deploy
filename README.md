@@ -35,16 +35,12 @@ docker compose run web ./manage.py createsuperuser
 
 ## Как запустить dev-версию в minikube
 
-Запустите базу данных:
-```shell
-docker compose up -d db
-```
-
-В отдельном терминале запустите minikube и tunnel 
+В отдельном терминале запустите minikube, ingress controller и tunnel 
 (необходим для подключения к сервису в случае с minikube), 
 оставьте окно с tunnel открытым:
 ```shell
 minikube start
+minikube addons enable ingress
 minikube tunnel
 ```
 
@@ -59,13 +55,25 @@ docker image build -t web_django backend_main_django/
 kubectl apply -f k8s/web-django-service.yml
 ```
 
+Запустите базу данных в кластере:
+```shell
+helm repo update && helm install db bitnami/postgresql
+```
+
+Получите пароль от БД:
+```shell
+echo $(kubectl get secret --namespace default db-postgresql -o jsonpath="{.data.postgres-password}" | base64 -d)
+```
+
 Создайте ConfigMap: скопируйте файл `web-django-config.yml.template`, 
 удалив суффикс `.template`. 
 Заполните значения:
-- `SECRET_KEY`: любое (см. выше)
-- `DATABASE_URL`: в секции `host` должен быть внешний IP-адрес вашего компьютера. 
-Получить его можно командой `ip a`.
+- `SECRET_KEY` (см. выше)
+- `DATABASE_URL`: в секции `password` должен быть пароль, полученный в предыдущем шаге.
 - `ALLOWED_HOSTS`: имя хоста вашего сайта (или несколько через запятую).
+- `DJANGO_SUPERUSER_USERNAME`
+- `DJANGO_SUPERUSER_EMAIL`
+- `DJANGO_SUPERUSER_PASSWORD`
 
 Загрузите конфиг:
 ```shell
@@ -77,6 +85,15 @@ kubectl apply -f k8s/web-django-config.yml
 192.168.49.2 star-burger.test
 ```
 
+Проведите миграцию БД:
+```shell
+kubectl apply -f k8s/web-django-migrate.yml
+```
+
+Создайте аккаунт администратора в Джанго. Данные пользователя берутся из переменных DJANGO_SUPERUSER_... в ConfigMap.
+```shell
+kubectl apply -f k8s/web-django-createsuperuser.yml
+```
 
 Запустите deployment и ingress:
 ```shell
