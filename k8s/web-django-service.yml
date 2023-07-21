@@ -6,6 +6,7 @@ spec:
   type: ClusterIP
   selector:
     app: web-django
+    component: web
   ports:
   - protocol: TCP
     port: 80
